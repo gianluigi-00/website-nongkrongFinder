@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="id">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Form Tempat - NongkrongFinder</title><link rel="stylesheet" href="/css/style.css"></head>
+<body>
+<nav id="nav" class="nav"></nav>
+<main class="container">
+  <section class="card">
+    <div class="between"><div><h1 id="title">Tambah Tempat</h1><p class="muted">Form ini dipakai untuk tambah dan edit tempat.</p></div><a class="btn ghost" href="/tempat">Kembali</a></div>
+    <div id="flash" class="hidden"></div>
+    <form id="form" class="form-grid mt">
+      <div><label>Nama Tempat *</label><input name="namaTempat" required></div>
+      <div><label>Kategori</label><input name="kategori" placeholder="Cafe, outdoor..."></div>
+      <div class="full"><label>Alamat / Lokasi</label><input name="alamat"></div>
+      <div><label>Jam Buka</label><input name="jamBuka" placeholder="08:00"></div>
+      <div><label>Jam Tutup</label><input name="jamTutup" placeholder="22:00"></div>
+      <div><label>Harga Min</label><input name="hargaMin" type="number" min="0"></div>
+      <div><label>Harga Max</label><input name="hargaMax" type="number" min="0"></div>
+      <div class="full"><label>Fasilitas</label><input name="fasilitas" placeholder="wifi, parkir, mushola"></div>
+      <div class="full"><label>URL Foto</label><input name="foto"></div>
+      <div class="full"><label>Deskripsi</label><textarea name="deskripsi"></textarea></div>
+      <div class="full"><button class="btn primary" type="submit">Simpan</button></div>
+    </form>
+  </section>
+</main>
+<script src="/js/api.js"></script>
+<script>
+let id = NF.qs('id');
+function setForm(data) { for (const [k,v] of Object.entries(data)) { const input = document.querySelector(`[name="${k}"]`); if (input) input.value = v ?? ''; } }
+(async () => {
+  await NF.guard();
+  await NF.renderNav('tempat');
+  if (id) {
+    document.querySelector('#title').textContent = 'Edit Tempat';
+    const t = await NF.request('/api/tempat/' + id);
+    setForm(t);
+  }
+})();
+document.querySelector('#form').addEventListener('submit', async e => {
+  e.preventDefault();
+  const body = NF.formToObject(e.target);
+  body.hargaMin = body.hargaMin ? Number(body.hargaMin) : null;
+  body.hargaMax = body.hargaMax ? Number(body.hargaMax) : null;
+  try {
+    await NF.request(id ? '/api/tempat/' + id : '/api/tempat', { method: id ? 'PUT' : 'POST', body });
+    location.href = '/tempat';
+  } catch (err) { NF.flash(err.message, false); }
+});
+</script>
+</body></html>

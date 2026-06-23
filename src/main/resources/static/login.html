@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Login - NongkrongFinder</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<nav id="nav" class="nav"></nav>
+<main class="auth-simple auth-only">
+  <section class="auth-form-card auth-form-only">
+    <div class="center-head">
+      <span class="badge">Nongkrong & Event Finder</span>
+      <h1 class="auth-title">Login</h1>
+      <p class="section-subtitle">Masuk sebagai User atau Admin.</p>
+    </div>
+    <div id="flash" class="hidden"></div>
+    <form id="loginForm" class="grid mt">
+      <div>
+        <label>Email</label>
+        <input name="email" type="email" required placeholder="contoh@email.com" autocomplete="email">
+      </div>
+      <div>
+        <label>Password</label>
+        <input name="password" type="password" required placeholder="Masukkan password" autocomplete="current-password">
+      </div>
+      <button class="btn primary" type="submit">Login</button>
+    </form>
+    <p class="small muted mt center-text">Belum punya akun? <a href="/register" style="color:var(--primary);font-weight:800">Daftar di sini</a></p>
+  </section>
+</main>
+<script src="/js/api.js"></script>
+<script>
+NF.renderNav();
+document.querySelector('#loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try {
+    const user = await NF.request('/api/auth/login', { method:'POST', body: NF.formToObject(e.target) });
+    location.href = user.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard';
+  } catch (err) {
+    NF.flash(err.message, false);
+  }
+});
+</script>
+</body>
+</html>

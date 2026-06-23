@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Dashboard - NongkrongFinder</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<nav id="nav" class="nav"></nav>
+<main class="container">
+  <section class="hero">
+    <h1>Dashboard NongkrongFinder</h1>
+    <p id="welcome">Temukan tempat nongkrong, beri review, simpan favorit, dan ikuti event seru bersama teman.</p>
+  </section>
+
+  <section class="grid grid-4 mt" id="stats"></section>
+
+  <section class="card mt">
+    <div class="between mb">
+      <div>
+        <h2 class="section-title">Fitur Utama</h2>
+        <p class="section-subtitle">Semua fitur inti dipisahkan untuk user dan admin sesuai use case proyek.</p>
+      </div>
+    </div>
+    <div class="grid grid-3">
+      <div class="link-card">
+        <h3>Manajemen Tempat</h3>
+        <p class="small muted">Tambah, edit, hapus, dan tampilkan detail tempat nongkrong.</p>
+      </div>
+      <div class="link-card">
+        <h3>Review & Rating</h3>
+        <p class="small muted">Beri rating 1–5 dan komentar untuk setiap tempat yang dikunjungi.</p>
+      </div>
+      <div class="link-card">
+        <h3>Favorit & Event</h3>
+        <p class="small muted">Simpan tempat favorit dan buat atau ikuti event nongkrong bersama.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="grid grid-3 mt">
+    <a class="link-card" href="/tempat"><h3>Lihat Tempat</h3><p class="small muted">Cari tempat berdasarkan kata kunci dan filter.</p></a>
+    <a class="link-card" href="/event"><h3>Lihat Event</h3><p class="small muted">Temukan event nongkrong yang tersedia.</p></a>
+    <a class="link-card" href="/favorit"><h3>Tempat Favorit</h3><p class="small muted">Lihat daftar tempat yang sudah kamu simpan.</p></a>
+  </section>
+</main>
+<script src="/js/api.js"></script>
+<script>
+(async () => {
+  const user = await NF.renderNav('dashboard');
+  if (user) {
+    document.querySelector('#welcome').textContent = `Selamat datang, ${user.nama}. Kamu login sebagai ${user.role}.`;
+  }
+  const stats = await NF.request('/api/dashboard/stats');
+  document.querySelector('#stats').innerHTML = `
+    <div class="stat"><b>${stats.jumlahUser}</b><span class="muted">Total User</span></div>
+    <div class="stat"><b>${stats.jumlahTempat}</b><span class="muted">Total Tempat</span></div>
+    <div class="stat"><b>${stats.jumlahReview}</b><span class="muted">Total Review</span></div>
+    <div class="stat"><b>${stats.jumlahEvent}</b><span class="muted">Total Event</span></div>`;
+})();
+</script>
+</body>
+</html>

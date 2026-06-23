@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="id">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin - NongkrongFinder</title><link rel="stylesheet" href="/css/style.css"></head>
+<body>
+<nav id="nav" class="nav"></nav>
+<main class="container">
+  <section class="hero"><h1>Panel Admin</h1><p>Kelola user, tempat, review, dan event dari satu halaman.</p></section>
+  <section class="grid grid-4 mt" id="stats"></section>
+  <section class="grid grid-4 mt">
+    <a class="card" href="/admin/users"><h2>Kelola User</h2><p class="muted">Tambah, edit, hapus user.</p></a>
+    <a class="card" href="/admin/tempat"><h2>Kelola Tempat</h2><p class="muted">Lihat, edit, hapus data tempat user.</p></a>
+    <a class="card" href="/admin/review"><h2>Kelola Review</h2><p class="muted">Pantau dan hapus review user.</p></a>
+    <a class="card" href="/admin/event"><h2>Kelola Event</h2><p class="muted">Edit, hapus, dan pantau event.</p></a>
+  </section>
+</main>
+<script src="/js/api.js"></script>
+<script>
+(async () => {
+  await NF.guard('ADMIN');
+  await NF.renderNav('admin');
+  const s = await NF.request('/api/dashboard/stats');
+  document.querySelector('#stats').innerHTML = `<div class="stat"><b>${s.jumlahUser}</b><span class="muted">User</span></div><div class="stat"><b>${s.jumlahTempat}</b><span class="muted">Tempat</span></div><div class="stat"><b>${s.jumlahReview}</b><span class="muted">Review</span></div><div class="stat"><b>${s.jumlahEvent}</b><span class="muted">Event</span></div>`;
+})();
+</script>
+</body></html>

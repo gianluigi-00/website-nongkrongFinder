@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="id">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Peserta Event - NongkrongFinder</title><link rel="stylesheet" href="/css/style.css"></head>
+<body>
+<nav id="nav" class="nav"></nav>
+<main class="container">
+  <div class="between mb"><div><h1 id="title">Peserta Event</h1><p class="muted">Daftar peserta yang sudah join.</p></div><a class="btn ghost" href="/event">Kembali</a></div>
+  <section class="table-wrap"><table><thead><tr><th>Nama</th><th>Email</th><th>Tanggal Join</th></tr></thead><tbody id="tbody"></tbody></table></section>
+</main>
+<script src="/js/api.js"></script>
+<script>
+(async () => {
+  await NF.renderNav('event');
+  const id = NF.qs('id');
+  const event = await NF.request('/api/event/' + id);
+  document.querySelector('#title').textContent = 'Peserta: ' + event.namaEvent;
+  const data = await NF.request('/api/event/' + id + '/peserta');
+  document.querySelector('#tbody').innerHTML = data.length ? data.map(p => `<tr><td>${NF.escape(p.namaUser)}</td><td>${NF.escape(p.emailUser)}</td><td>${NF.dateTime(p.tanggalJoin)}</td></tr>`).join('') : '<tr><td colspan="3">Belum ada peserta.</td></tr>';
+})();
+</script>
+</body></html>

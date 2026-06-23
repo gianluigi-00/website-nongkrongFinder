@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="id">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin Event - NongkrongFinder</title><link rel="stylesheet" href="/css/style.css"></head>
+<body>
+<nav id="nav" class="nav"></nav>
+<main class="container">
+  <div class="between mb"><div><h1>Kelola Data Event</h1><p class="muted">Admin bisa edit/hapus semua event.</p></div><a class="btn ghost" href="/admin/dashboard">Panel Admin</a></div>
+  <div id="flash" class="hidden"></div>
+  <section class="table-wrap"><table><thead><tr><th>Nama Event</th><th>Pembuat</th><th>Tanggal</th><th>Lokasi</th><th>Status</th><th>Peserta</th><th>Aksi</th></tr></thead><tbody id="tbody"></tbody></table></section>
+</main>
+<script src="/js/api.js"></script>
+<script>
+function badge(s){ const c=s==='BATAL'?'cancel':s==='SELESAI'?'done':'active'; return `<span class="badge ${c}">${NF.escape(s||'AKTIF')}</span>`; }
+async function load(){ const data = await NF.request('/api/admin/event'); document.querySelector('#tbody').innerHTML = data.length ? data.map(e => `<tr><td>${NF.escape(e.namaEvent)}</td><td>${NF.escape(e.namaUser||'-')}</td><td>${NF.dateTime(e.tanggalEvent)}</td><td>${NF.escape(e.lokasi||'-')}</td><td>${badge(e.status)}</td><td>${e.jumlahPeserta}/${e.maksPeserta||'∞'}</td><td class="actions"><a class="btn ghost" href="/event-peserta?id=${e.idEvent}">Peserta</a><a class="btn ghost" href="/event-form?id=${e.idEvent}">Edit</a><button class="btn danger" onclick="hapus(${e.idEvent})">Hapus</button></td></tr>`).join('') : '<tr><td colspan="7">Belum ada data.</td></tr>'; }
+async function hapus(id){ if(!confirm('Hapus event ini?')) return; try{ await NF.request('/api/event/'+id,{method:'DELETE'}); NF.flash('Event dihapus.'); await load(); }catch(err){ NF.flash(err.message,false); } }
+(async()=>{ await NF.guard('ADMIN'); await NF.renderNav('admin'); await load(); })();
+</script>
+</body></html>

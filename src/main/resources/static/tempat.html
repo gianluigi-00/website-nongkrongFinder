@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="id">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tempat - NongkrongFinder</title><link rel="stylesheet" href="/css/style.css"></head>
+<body>
+<nav id="nav" class="nav"></nav>
+<main class="container">
+  <div class="between mb"><div><h1>Daftar Tempat Nongkrong</h1><p class="muted">Cari berdasarkan nama, kategori, lokasi, harga, dan fasilitas.</p></div><a class="btn primary" href="/tempat-form">+ Tambah Tempat</a></div>
+  <div id="flash" class="hidden"></div>
+  <section class="card mb">
+    <form id="filterForm" class="form-grid">
+      <div><label>Keyword</label><input name="keyword" placeholder="Nama, alamat, kategori, deskripsi"></div>
+      <div><label>Kategori</label><input name="kategori" placeholder="Cafe, outdoor, coworking"></div>
+      <div><label>Lokasi</label><input name="lokasi" placeholder="Purwokerto, Baturraden..."></div>
+      <div><label>Fasilitas</label><input name="fasilitas" placeholder="wifi, parkir, live music"></div>
+      <div><label>Harga Min</label><input name="hargaMin" type="number" min="0"></div>
+      <div><label>Harga Max</label><input name="hargaMax" type="number" min="0"></div>
+      <div><label>Sort</label><select name="sort"><option value="nama_asc">Nama A-Z</option><option value="nama_desc">Nama Z-A</option><option value="kategori">Kategori</option><option value="rating">Rating Tertinggi</option></select></div>
+      <div style="align-self:end"><button class="btn primary" type="submit">Terapkan Filter</button></div>
+    </form>
+  </section>
+  <section id="list" class="grid grid-3"></section>
+</main>
+<script src="/js/api.js"></script>
+<script>
+let currentUser = null;
+async function loadTempat() {
+  const params = new URLSearchParams(new FormData(document.querySelector('#filterForm')));
+  [...params.keys()].forEach(k => { if (!params.get(k)) params.delete(k); });
+  const data = await NF.request('/api/tempat?' + params.toString());
+  const el = document.querySelector('#list');
+  if (!data.length) { el.innerHTML = '<div class="empty">Belum ada tempat.</div>'; return; }
+  el.innerHTML = data.map(t => `
+    <article class="card">
+      <img class="place-img"
+     src="/images/${encodeURIComponent(t.foto)}">
+      <div class="between mt"><span class="badge">${NF.escape(t.kategori || '-')}</span><span class="stars">★ ${t.ratingRataRata || 0} (${t.jumlahReview})</span></div>
+      <h2>${NF.escape(t.namaTempat)}</h2>
+      <p class="muted">📍 ${NF.escape(t.alamat || '-')}</p>
+      <p class="small">Harga: ${NF.money(t.hargaMin)} - ${NF.money(t.hargaMax)}</p>
+      <p class="small muted">Fasilitas: ${NF.escape(t.fasilitas || '-')}</p>
+      <div class="actions mt">
+        <a class="btn ghost" href="/tempat-detail?id=${t.idTempat}">Detail</a>
+        <a class="btn ghost" href="/review?tempatId=${t.idTempat}">Review</a>
+        ${currentUser ? `<button class="btn ${t.favorit ? 'danger' : 'success'}" onclick="toggleFavorit(${t.idTempat}, ${t.favorit})">${t.favorit ? 'Hapus Favorit' : 'Favorit'}</button>` : ''}
+        ${currentUser && (currentUser.role === 'ADMIN' || currentUser.idUser === t.idUser) ? `<a class="btn ghost" href="/tempat-form?id=${t.idTempat}">Edit</a><button class="btn danger" onclick="hapusTempat(${t.idTempat})">Hapus</button>` : ''}
+      </div>
+    </article>`).join('');
+}
+async function toggleFavorit(id, isFav) {
+  try {
+    if (isFav) await NF.request('/api/favorit/tempat/' + id, { method:'DELETE' });
+    else await NF.request('/api/favorit/' + id, { method:'POST' });
+    await loadTempat();
+  } catch (err) { NF.flash(err.message, false); }
+}
+async function hapusTempat(id) {
+  if (!confirm('Hapus tempat ini beserta review/favorit terkait?')) return;
+  try { await NF.request('/api/tempat/' + id, { method:'DELETE' }); NF.flash('Tempat berhasil dihapus.'); await loadTempat(); }
+  catch (err) { NF.flash(err.message, false); }
+}
+document.querySelector('#filterForm').addEventListener('submit', e => { e.preventDefault(); loadTempat().catch(err => NF.flash(err.message, false)); });
+(async () => { currentUser = await NF.renderNav('tempat'); await loadTempat(); })();
+</script>
+</body></html>

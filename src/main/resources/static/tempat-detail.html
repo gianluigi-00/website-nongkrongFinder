@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="id">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Detail Tempat - NongkrongFinder</title><link rel="stylesheet" href="/css/style.css"></head>
+<body>
+<nav id="nav" class="nav"></nav>
+<main class="container">
+  <div id="detail"></div>
+</main>
+<script src="/js/api.js"></script>
+<script>
+(async () => {
+  await NF.renderNav('tempat');
+  const id = NF.qs('id');
+  if (!id) { document.querySelector('#detail').innerHTML = '<div class="empty">ID tempat tidak ditemukan.</div>'; return; }
+  const t = await NF.request('/api/tempat/' + id);
+  document.querySelector('#detail').innerHTML = `
+    <section class="card">
+      <div class="between"><h1>${NF.escape(t.namaTempat)}</h1><a class="btn ghost" href="/tempat">Kembali</a></div>
+      <img class="place-img"
+      src="${t.foto ? '/images/' + encodeURIComponent(t.foto) : 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=1200'}"
+      alt="Foto tempat">
+      <p><span class="badge">${NF.escape(t.kategori || '-')}</span> <span class="stars">★ ${t.ratingRataRata || 0}</span> <span class="muted">(${t.jumlahReview} review)</span></p>
+      <p><b>Alamat:</b> ${NF.escape(t.alamat || '-')}</p>
+      <p><b>Jam:</b> ${NF.escape(t.jamBuka || '-')} - ${NF.escape(t.jamTutup || '-')}</p>
+      <p><b>Harga:</b> ${NF.money(t.hargaMin)} - ${NF.money(t.hargaMax)}</p>
+      <p><b>Fasilitas:</b> ${NF.escape(t.fasilitas || '-')}</p>
+      <p><b>Deskripsi:</b><br>${NF.escape(t.deskripsi || '-')}</p>
+      <div class="actions"><a class="btn primary" href="/review?tempatId=${t.idTempat}">Lihat / Tambah Review</a></div>
+    </section>`;
+})();
+</script>
+</body></html>

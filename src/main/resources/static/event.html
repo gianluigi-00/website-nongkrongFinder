@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="id">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Event - NongkrongFinder</title><link rel="stylesheet" href="/css/style.css"></head>
+<body>
+<nav id="nav" class="nav"></nav>
+<main class="container">
+  <div class="between mb"><div><h1>Event Nongkrong</h1><p class="muted">Buat, join, lihat peserta, dan kelola event.</p></div><a class="btn primary" href="/event-form">+ Buat Event</a></div>
+  <div id="flash" class="hidden"></div>
+  <section id="list" class="grid grid-2"></section>
+</main>
+<script src="/js/api.js"></script>
+<script>
+let currentUser = null;
+function statusBadge(s) { const c = s === 'BATAL' ? 'cancel' : s === 'SELESAI' ? 'done' : 'active'; return `<span class="badge ${c}">${NF.escape(s || 'AKTIF')}</span>`; }
+async function load() {
+  const data = await NF.request('/api/event');
+  const el = document.querySelector('#list');
+  if (!data.length) { el.innerHTML = '<div class="empty">Belum ada event.</div>'; return; }
+  el.innerHTML = data.map(e => `
+    <article class="card">
+      <div class="between"><h2>${NF.escape(e.namaEvent)}</h2>${statusBadge(e.status)}</div>
+      <p class="muted">📍 ${NF.escape(e.lokasi || '-')} · ${NF.dateTime(e.tanggalEvent)}</p>
+      <p>${NF.escape(e.deskripsi || '-')}</p>
+      <p class="small"><b>Peserta:</b> ${e.jumlahPeserta}/${e.maksPeserta || '∞'} · Pembuat: ${NF.escape(e.namaUser || '-')}</p>
+      <div class="actions">
+        <a class="btn ghost" href="/event-peserta?id=${e.idEvent}">Peserta</a>
+        ${currentUser ? (e.joined ? `<button class="btn danger" onclick="leaveEvent(${e.idEvent})">Keluar</button>` : `<button class="btn success" onclick="joinEvent(${e.idEvent})">Join</button>`) : ''}
+        ${currentUser && (currentUser.role === 'ADMIN' || e.owner) ? `<a class="btn ghost" href="/event-form?id=${e.idEvent}">Edit</a><button class="btn danger" onclick="hapusEvent(${e.idEvent})">Hapus</button>` : ''}
+      </div>
+    </article>`).join('');
+}
+async function joinEvent(id) { try { await NF.request('/api/event/' + id + '/join', { method:'POST' }); await load(); } catch (err) { NF.flash(err.message, false); } }
+async function leaveEvent(id) { try { await NF.request('/api/event/' + id + '/join', { method:'DELETE' }); await load(); } catch (err) { NF.flash(err.message, false); } }
+async function hapusEvent(id) { if (!confirm('Hapus event ini?')) return; try { await NF.request('/api/event/' + id, { method:'DELETE' }); NF.flash('Event dihapus.'); await load(); } catch (err) { NF.flash(err.message, false); } }
+(async () => { currentUser = await NF.renderNav('event'); await load(); })();
+</script>
+</body></html>

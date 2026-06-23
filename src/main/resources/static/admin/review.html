@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="id">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin Review - NongkrongFinder</title><link rel="stylesheet" href="/css/style.css"></head>
+<body>
+<nav id="nav" class="nav"></nav>
+<main class="container">
+  <div class="between mb"><div><h1>Kelola Data Review</h1><p class="muted">Admin bisa melihat dan menghapus review user.</p></div><a class="btn ghost" href="/admin/dashboard">Panel Admin</a></div>
+  <div id="flash" class="hidden"></div>
+  <section class="table-wrap"><table><thead><tr><th>User</th><th>Tempat</th><th>Rating</th><th>Komentar</th><th>Tanggal</th><th>Aksi</th></tr></thead><tbody id="tbody"></tbody></table></section>
+</main>
+<script src="/js/api.js"></script>
+<script>
+async function load(){ const data = await NF.request('/api/admin/review'); document.querySelector('#tbody').innerHTML = data.length ? data.map(r => `<tr><td>${NF.escape(r.namaUser)}</td><td>${NF.escape(r.namaTempat)}</td><td>★ ${r.rating}</td><td>${NF.escape(r.komentar)}</td><td>${NF.dateTime(r.tanggalReview)}</td><td class="actions"><a class="btn ghost" href="/review?tempatId=${r.idTempat}">Buka</a><button class="btn danger" onclick="hapus(${r.idReview})">Hapus</button></td></tr>`).join('') : '<tr><td colspan="6">Belum ada data.</td></tr>'; }
+async function hapus(id){ if(!confirm('Hapus review ini?')) return; try{ await NF.request('/api/review/'+id,{method:'DELETE'}); NF.flash('Review dihapus.'); await load(); }catch(err){ NF.flash(err.message,false); } }
+(async()=>{ await NF.guard('ADMIN'); await NF.renderNav('admin'); await load(); })();
+</script>
+</body></html>

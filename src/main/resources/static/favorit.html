@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="id">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Favorit - NongkrongFinder</title><link rel="stylesheet" href="/css/style.css"></head>
+<body>
+<nav id="nav" class="nav"></nav>
+<main class="container">
+  <div class="between mb"><div><h1>Tempat Favorit</h1><p class="muted">Daftar tempat yang kamu bookmark.</p></div><a class="btn primary" href="/tempat">Cari Tempat</a></div>
+  <div id="flash" class="hidden"></div>
+  <section id="list" class="grid grid-3"></section>
+</main>
+<script src="/js/api.js"></script>
+<script>
+async function load() {
+  const data = await NF.request('/api/favorit');
+  const el = document.querySelector('#list');
+  if (!data.length) { el.innerHTML = '<div class="empty">Belum ada favorit.</div>'; return; }
+  el.innerHTML = data.map(f => {
+    const t = f.tempat;
+    return `<article class="card"><img class="place-img" src="${NF.escape(t.foto || 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=900')}"><h2>${NF.escape(t.namaTempat)}</h2><p class="muted">📍 ${NF.escape(t.alamat || '-')}</p><p class="small">Ditambahkan: ${NF.dateTime(f.tanggalFavorit)}</p><div class="actions"><a class="btn ghost" href="/tempat-detail?id=${t.idTempat}">Detail</a><button class="btn danger" onclick="hapus(${f.idFavorit})">Hapus</button></div></article>`;
+  }).join('');
+}
+async function hapus(id) { if (!confirm('Hapus dari favorit?')) return; try { await NF.request('/api/favorit/' + id, { method:'DELETE' }); await load(); } catch (err) { NF.flash(err.message, false); } }
+(async () => { await NF.guard(); await NF.renderNav('favorit'); await load(); })();
+</script>
+</body></html>

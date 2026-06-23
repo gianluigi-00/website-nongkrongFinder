@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Profil - NongkrongFinder</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<nav id="nav" class="nav"></nav>
+<main class="container">
+  <section class="card center">
+    <div class="profile-head mb">
+      <img id="previewFoto" class="profile-photo" src="https://ui-avatars.com/api/?name=User&background=f59e0b&color=fff" alt="Foto profil">
+      <div>
+        <h1 style="margin:0 0 6px">Kelola Profil</h1>
+        <p class="muted" style="margin:0">Kosongkan password jika tidak ingin mengganti password.</p>
+      </div>
+    </div>
+
+    <div id="flash" class="hidden"></div>
+    <form id="form" class="grid">
+      <div>
+        <label>Nama</label>
+        <input name="nama" required>
+      </div>
+      <div>
+        <label>Email</label>
+        <input name="email" type="email" required>
+      </div>
+      <div>
+        <label>Password Baru</label>
+        <input name="password" type="password" placeholder="Opsional">
+      </div>
+      <div>
+        <label>URL Foto Profil</label>
+        <input name="fotoProfil" placeholder="https://domain.com/foto.jpg">
+      </div>
+      <div class="profile-hint small muted">
+        Gunakan link gambar langsung yang berakhiran <b>.jpg</b>, <b>.png</b>, atau <b>.webp</b>.
+        Contoh: <code>https://i.imgur.com/xxxx.jpg</code>. Link halaman Google Search biasanya tidak bisa ditampilkan sebagai foto.
+      </div>
+      <button class="btn primary" type="submit">Simpan Profil</button>
+    </form>
+  </section>
+</main>
+<script src="/js/api.js"></script>
+<script>
+function avatarUrl(name) {
+  return 'https://ui-avatars.com/api/?name=' + encodeURIComponent(name || 'User') + '&background=f59e0b&color=fff';
+}
+function updatePreview() {
+  const nama = document.querySelector('[name="nama"]').value || 'User';
+  const url = document.querySelector('[name="fotoProfil"]').value;
+  const img = document.querySelector('#previewFoto');
+  img.src = url || avatarUrl(nama);
+  img.onerror = () => { img.src = avatarUrl(nama); };
+}
+(async () => {
+  const user = await NF.guard();
+  await NF.renderNav('profil');
+  document.querySelector('[name="nama"]').value = user.nama || '';
+  document.querySelector('[name="email"]').value = user.email || '';
+  document.querySelector('[name="fotoProfil"]').value = user.fotoProfil || '';
+  updatePreview();
+})();
+document.querySelector('[name="fotoProfil"]').addEventListener('input', updatePreview);
+document.querySelector('[name="nama"]').addEventListener('input', updatePreview);
+document.querySelector('#form').addEventListener('submit', async e => {
+  e.preventDefault();
+  try {
+    await NF.request('/api/auth/profile', { method:'PUT', body: NF.formToObject(e.target) });
+    NF.flash('Profil berhasil diperbarui.');
+    await NF.renderNav('profil');
+    updatePreview();
+  } catch (err) {
+    NF.flash(err.message, false);
+  }
+});
+</script>
+</body>
+</html>

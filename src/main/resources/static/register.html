@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Register - NongkrongFinder</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<nav id="nav" class="nav"></nav>
+<main class="auth-simple auth-only">
+  <section class="auth-form-card auth-form-only">
+    <div class="center-head">
+      <span class="badge">Nongkrong & Event Finder</span>
+      <h1 class="auth-title">Register</h1>
+      <p class="section-subtitle">Buat akun user baru untuk mulai memakai aplikasi.</p>
+    </div>
+    <div id="flash" class="hidden"></div>
+    <form id="registerForm" class="grid mt">
+      <div>
+        <label>Nama Lengkap</label>
+        <input name="nama" required placeholder="Nama lengkap">
+      </div>
+      <div>
+        <label>Email</label>
+        <input name="email" type="email" required placeholder="contoh@email.com" autocomplete="email">
+      </div>
+      <div>
+        <label>Password</label>
+        <input name="password" type="password" required placeholder="Buat password" autocomplete="new-password">
+      </div>
+      <button class="btn primary" type="submit">Buat Akun</button>
+    </form>
+    <p class="small muted mt center-text">Sudah punya akun? <a href="/login" style="color:var(--primary);font-weight:800">Login di sini</a></p>
+  </section>
+</main>
+<script src="/js/api.js"></script>
+<script>
+NF.renderNav();
+document.querySelector('#registerForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try {
+    await NF.request('/api/auth/register', { method:'POST', body: NF.formToObject(e.target) });
+    alert('Registrasi berhasil. Silakan login.');
+    location.href = '/login';
+  } catch (err) {
+    NF.flash(err.message, false);
+  }
+});
+</script>
+</body>
+</html>

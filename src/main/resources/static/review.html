@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="id">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Review - NongkrongFinder</title><link rel="stylesheet" href="/css/style.css"></head>
+<body>
+<nav id="nav" class="nav"></nav>
+<main class="container">
+  <div id="flash" class="hidden"></div>
+  <section class="card mb" id="reviewBox"></section>
+  <section id="list" class="grid"></section>
+</main>
+<script src="/js/api.js"></script>
+<script>
+let tempatId = NF.qs('tempatId');
+let currentUser = null;
+let reviewCache = [];
+async function load() {
+  const tempat = await NF.request('/api/tempat/' + tempatId);
+  const data = await NF.request('/api/review/tempat/' + tempatId);
+  reviewCache = data.reviews;
+  document.querySelector('#reviewBox').innerHTML = `
+    <div class="between"><div><h1>Review: ${NF.escape(tempat.namaTempat)}</h1><p class="muted">Rating rata-rata: <b class="stars">★ ${data.ratingRataRata}</b> dari ${data.jumlahReview} review.</p></div><a class="btn ghost" href="/tempat-detail?id=${tempatId}">Detail Tempat</a></div>
+    ${currentUser ? `<form id="reviewForm" class="form-grid mt"><div><label>Rating 1-5</label><input name="rating" type="number" min="1" max="5" required></div><div class="full"><label>Komentar</label><textarea name="komentar" required></textarea></div><div class="full"><button class="btn primary" type="submit">Simpan Review</button></div></form>` : '<p class="alert err">Login untuk menulis review.</p>'}`;
+  if (currentUser) {
+    const own = data.reviews.find(r => r.idUser === currentUser.idUser);
+    if (own) { document.querySelector('[name="rating"]').value = own.rating; document.querySelector('[name="komentar"]').value = own.komentar; }
+    document.querySelector('#reviewForm').addEventListener('submit', saveReview);
+  }
+  const list = document.querySelector('#list');
+  if (!data.reviews.length) { list.innerHTML = '<div class="empty">Belum ada review untuk tempat ini.</div>'; return; }
+  list.innerHTML = data.reviews.map(r => `
+    <article class="card">
+      <div class="between"><b>${NF.escape(r.namaUser)}</b><span class="stars">★ ${r.rating}</span></div>
+      <p>${NF.escape(r.komentar)}</p>
+      <p class="muted small">${NF.dateTime(r.tanggalReview)}</p>
+      ${currentUser && (currentUser.role === 'ADMIN' || r.owner) ? `<div class="actions"><button class="btn ghost" onclick="editReview(${r.idReview})">Edit</button><button class="btn danger" onclick="hapusReview(${r.idReview})">Hapus</button></div>` : ''}
+    </article>`).join('');
+}
+async function saveReview(e) {
+  e.preventDefault();
+  const body = NF.formToObject(e.target); body.rating = Number(body.rating);
+  try { await NF.request('/api/review/tempat/' + tempatId, { method:'POST', body }); NF.flash('Review tersimpan.'); await load(); }
+  catch (err) { NF.flash(err.message, false); }
+}
+async function editReview(id) {
+  const r = reviewCache.find(x => x.idReview === id);
+  if (!r) return;
+  const newRating = Number(prompt('Rating 1-5:', r.rating));
+  if (!newRating) return;
+  const newKomentar = prompt('Komentar:', r.komentar || '');
+  if (!newKomentar) return;
+  try { await NF.request('/api/review/' + id, { method:'PUT', body:{ rating:newRating, komentar:newKomentar } }); NF.flash('Review diperbarui.'); await load(); }
+  catch (err) { NF.flash(err.message, false); }
+}
+async function hapusReview(id) {
+  if (!confirm('Hapus review ini?')) return;
+  try { await NF.request('/api/review/' + id, { method:'DELETE' }); NF.flash('Review dihapus.'); await load(); }
+  catch (err) { NF.flash(err.message, false); }
+}
+(async () => {
+  currentUser = await NF.renderNav('tempat');
+  if (!tempatId) { document.querySelector('#reviewBox').innerHTML = '<div class="empty">ID tempat tidak ditemukan.</div>'; return; }
+  await load();
+})();
+</script>
+</body></html>
