@@ -10,8 +10,8 @@
 <nav id="nav" class="nav"></nav>
 <main class="container">
   <section class="hero">
-    <h1>Dashboard NongkrongFinder</h1>
-    <p id="welcome">Temukan tempat nongkrong, beri review, simpan favorit, dan ikuti event seru bersama teman.</p>
+    <h1>Nyari Tempat Nongkrong? 🎉</h1>
+    <p id="welcome">Cari tempat kece, kasih rating, bookmark favorit, dan ikut event seru bareng teman-teman. Santai aja, semua di sini!</p>
   </section>
 
   <section class="grid grid-4 mt" id="stats"></section>
@@ -19,30 +19,30 @@
   <section class="card mt">
     <div class="between mb">
       <div>
-        <h2 class="section-title">Fitur Utama</h2>
-        <p class="section-subtitle">Semua fitur inti dipisahkan untuk user dan admin sesuai use case proyek.</p>
+        <h2 class="section-title">Yang Bisa Kamu Lakuin 🚀</h2>
+        <p class="section-subtitle">Dari cari tempat nongkrong sampe ikut event seru, semua ada di sini!</p>
       </div>
     </div>
     <div class="grid grid-3">
       <div class="link-card">
-        <h3>Manajemen Tempat</h3>
-        <p class="small muted">Tambah, edit, hapus, dan tampilkan detail tempat nongkrong.</p>
+        <h3>🏪 Cari & Kelola Tempat</h3>
+        <p class="small muted">Tambah, edit, dan lihat detail tempat nongkrong favorit kamu.</p>
       </div>
       <div class="link-card">
-        <h3>Review & Rating</h3>
-        <p class="small muted">Beri rating 1–5 dan komentar untuk setiap tempat yang dikunjungi.</p>
+        <h3>⭐ Kasih Rating & Review</h3>
+        <p class="small muted">Beri rating 1–5 dan tulis komentar buat tempat yang udah kamu datengin.</p>
       </div>
       <div class="link-card">
-        <h3>Favorit & Event</h3>
-        <p class="small muted">Simpan tempat favorit dan buat atau ikuti event nongkrong bersama.</p>
+        <h3>💾 Bookmark & Ikutan Event</h3>
+        <p class="small muted">Simpen tempat favorit, bikin event, atau join event seru bareng temen-temen.</p>
       </div>
     </div>
   </section>
 
   <section class="grid grid-3 mt">
-    <a class="link-card" href="/tempat"><h3>Lihat Tempat</h3><p class="small muted">Cari tempat berdasarkan kata kunci dan filter.</p></a>
-    <a class="link-card" href="/event"><h3>Lihat Event</h3><p class="small muted">Temukan event nongkrong yang tersedia.</p></a>
-    <a class="link-card" href="/favorit"><h3>Tempat Favorit</h3><p class="small muted">Lihat daftar tempat yang sudah kamu simpan.</p></a>
+    <a class="link-card" href="/tempat"><h3>🔍 Jelajahi Tempat</h3><p class="small muted">Cari tempat nongkrong berdasarkan nama, kategori, atau lokasi.</p></a>
+    <a class="link-card" href="/event"><h3>📅 Event Seru</h3><p class="small muted">Temukan dan ikut event nongkrong bareng komunitas.</p></a>
+    <a class="link-card" href="/favorit"><h3>❤️ Tempat Bookmark</h3><p class="small muted">Lihat tempat-tempat favorit yang udah kamu simpen.</p></a>
   </section>
 </main>
 <script src="/js/api.js"></script>
@@ -50,14 +50,14 @@
 (async () => {
   const user = await NF.renderNav('dashboard');
   if (user) {
-    document.querySelector('#welcome').textContent = `Selamat datang, ${user.nama}. Kamu login sebagai ${user.role}.`;
+    document.querySelector('#welcome').textContent = `Halo ${user.nama}! Kamu login sebagai ${user.role}. Yuk cari tempat nongkrong! 🎉`;
   }
   const stats = await NF.request('/api/dashboard/stats');
   document.querySelector('#stats').innerHTML = `
-    <div class="stat"><b>${stats.jumlahUser}</b><span class="muted">Total User</span></div>
-    <div class="stat"><b>${stats.jumlahTempat}</b><span class="muted">Total Tempat</span></div>
-    <div class="stat"><b>${stats.jumlahReview}</b><span class="muted">Total Review</span></div>
-    <div class="stat"><b>${stats.jumlahEvent}</b><span class="muted">Total Event</span></div>`;
+    <div class="stat"><div class="stat-icon">👥</div><b>${stats.jumlahUser}</b><span class="muted">Total User</span></div>
+    <div class="stat"><div class="stat-icon">📍</div><b>${stats.jumlahTempat}</b><span class="muted">Tempat Nongkrong</span></div>
+    <div class="stat"><div class="stat-icon">💬</div><b>${stats.jumlahReview}</b><span class="muted">Total Review</span></div>
+    <div class="stat"><div class="stat-icon">🎉</div><b>${stats.jumlahEvent}</b><span class="muted">Total Event</span></div>`;
 })();
 </script>
 </body>

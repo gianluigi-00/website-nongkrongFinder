@@ -51,7 +51,7 @@ async function toggleFavorit(id, isFav) {
     if (isFav) await NF.request('/api/favorit/tempat/' + id, { method:'DELETE' });
     else await NF.request('/api/favorit/' + id, { method:'POST' });
     await loadTempat();
-  } catch (err) { NF.flash(err.message, false); }
+  } catch (err) { NF.flash(err.message, false); } 
 }
 async function hapusTempat(id) {
   if (!confirm('Hapus tempat ini beserta review/favorit terkait?')) return;
